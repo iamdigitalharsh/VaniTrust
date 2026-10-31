@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, Key, Check, Save } from "lucide-react";
 
 interface SettingsModalProps {
@@ -24,6 +24,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [localFailproof, setLocalFailproof] = useState(failproofKey);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
+  const firstInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Focus management & Escape key handling
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => firstInputRef.current?.focus(), 50);
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") onClose();
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleSave = (e: React.FormEvent) => {
@@ -38,12 +52,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-title"
+    >
       <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl">
         <div className="flex items-center justify-between pb-4 border-b border-slate-800">
           <div className="flex items-center space-x-2">
             <Key className="w-5 h-5 text-orange-400" aria-hidden="true" />
-            <h3 id="settings-title" className="font-bold text-base text-white">API Configuration</h3>
+            <h3 id="settings-title" className="font-bold text-base text-white">
+              API Configuration
+            </h3>
           </div>
           <button
             onClick={onClose}
@@ -56,10 +77,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         <form onSubmit={handleSave} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="sarvam-key-input" className="text-xs font-semibold text-slate-200 block mb-1">
+            <label
+              htmlFor="sarvam-key-input"
+              className="text-xs font-semibold text-slate-200 block mb-1"
+            >
               Sarvam AI Key (Vernacular Speech & Audio)
             </label>
             <input
+              ref={firstInputRef}
               id="sarvam-key-input"
               type="password"
               value={localSarvam}
@@ -70,7 +95,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           <div>
-            <label htmlFor="failproof-key-input" className="text-xs font-semibold text-slate-200 block mb-1">
+            <label
+              htmlFor="failproof-key-input"
+              className="text-xs font-semibold text-slate-200 block mb-1"
+            >
               Failproof Verification Key (Optional)
             </label>
             <input

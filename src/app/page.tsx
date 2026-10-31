@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/Navbar";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { TrustHUD } from "@/components/TrustHUD";
+import { TrustHUDSkeleton } from "@/components/TrustHUDSkeleton";
 import { SampleQueries } from "@/components/SampleQueries";
 import { SettingsModal } from "@/components/SettingsModal";
 import { PRESET_SCENARIOS } from "@/data/scenarios";
@@ -162,16 +163,18 @@ export default function Home() {
             />
 
             <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800 text-slate-400 text-xs flex items-start space-x-2.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+              <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <p className="leading-relaxed">
                 यह प्रणाली हर उत्तर को भारत सरकार के आधिकारिक नियमों और स्वास्थ्य दिशानिर्देशों से जांचकर ही प्रस्तुत करती है ताकि कोई गलत सलाह न मिले।
               </p>
             </div>
           </div>
 
-          {/* Right Column: Verified Guidance Card */}
+          {/* Right Column: Verified Guidance Card or Skeleton */}
           <div className="lg:col-span-7">
-            {currentReport ? (
+            {isProcessing ? (
+              <TrustHUDSkeleton />
+            ) : currentReport ? (
               <TrustHUD
                 report={currentReport}
                 userQuery={currentQuery}
@@ -181,7 +184,7 @@ export default function Home() {
               />
             ) : (
               <div className="min-h-[18rem] rounded-2xl border border-dashed border-slate-800 flex flex-col items-center justify-center text-center p-6 text-slate-500">
-                <HelpCircle className="w-10 h-10 mb-2 text-slate-700" />
+                <HelpCircle className="w-10 h-10 mb-2 text-slate-700" aria-hidden="true" />
                 <p className="text-sm font-medium text-slate-400">कोई सवाल सक्रिय नहीं है</p>
                 <p className="text-xs text-slate-500 mt-1">
                   माइक पर क्लिक करके बोलें या ऊपर दिए गए किसी सवाल को चुनें।
@@ -198,7 +201,7 @@ export default function Home() {
           <div>
             VaniTrust (सत्य-वाणी) — Accurate Vernacular Voice Guidance
           </div>
-          <div className="text-slate-400 text-[11px]">
+          <div className="text-slate-400 text-xs">
             National Health Authority • Ministry of Agriculture • Statutory Guidelines
           </div>
         </div>

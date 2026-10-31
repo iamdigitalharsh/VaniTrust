@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { Mic, Square, Loader2, Globe, Send } from "lucide-react";
+import { useAudioRecorder } from "@/hooks/use-audio-recorder";
+import { AudioVisualizer } from "@/components/AudioVisualizer";
 
 interface AudioRecorderProps {
   onTranscriptionComplete: (transcript: string, language: string) => void;
@@ -24,97 +26,20 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   isProcessing,
   sarvamKey,
 }) => {
-  const [isRecording, setIsRecording] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("hi-IN");
   const [manualText, setManualText] = useState("");
-  const [recordingDuration, setRecordingDuration] = useState(0);
-  const [recordingError, setRecordingError] = useState<string | null>(null);
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
-  const startRecording = async () => {
-    setRecordingError(null);
-    audioChunksRef.current = [];
-    setRecordingDuration(0);
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach((track) => track.stop());
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-        await handleAudioUpload(audioBlob);
-      };
-
-      mediaRecorder.start(200);
-      setIsRecording(true);
-
-      timerRef.current = setInterval(() => {
-        setRecordingDuration((prev) => prev + 1);
-      }, 1000);
-    } catch (err: any) {
-      console.error("Microphone access error:", err);
-      setRecordingError(
-        err.name === "NotAllowedError"
-          ? "Microphone access was denied. Please allow microphone permissions or type your question below."
-          : "Unable to access microphone on this device."
-      );
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    }
-  };
-
-  const handleAudioUpload = async (audioBlob: Blob) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", audioBlob, "query.wav");
-      formData.append("languageCode", selectedLanguage);
-      if (sarvamKey) {
-        formData.append("sarvamKey", sarvamKey);
-      }
-
-      const res = await fetch("/api/transcribe", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || data.error || "Could not transcribe audio");
-      }
-
-      if (data.transcript) {
-        onTranscriptionComplete(data.transcript, selectedLanguage);
-      }
-    } catch (err: any) {
-      setRecordingError(err.message || "Failed to transcribe audio.");
-    }
-  };
+  const {
+    isRecording,
+    recordingDuration,
+    recordingError,
+    startRecording,
+    stopRecording,
+  } = useAudioRecorder({
+    selectedLanguage,
+    sarvamKey,
+    onTranscriptionComplete,
+  });
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,9 +74,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
           </select>
         </div>
 
-        <span className="text-xs text-slate-400">
-          बोलकर या लिखकर पूछें
-        </span>
+        <span className="text-xs text-slate-400">बोलकर या लिखकर पूछें</span>
       </div>
 
       {/* Mic Action Area */}
@@ -159,8 +82,14 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
         <div className="relative mb-5">
           {isRecording && (
             <>
-              <div className="absolute inset-0 rounded-full bg-red-500/20 motion-safe:animate-ping" aria-hidden="true" />
-              <div className="absolute -inset-4 rounded-full bg-orange-500/10 motion-safe:animate-pulse" aria-hidden="true" />
+              <div
+                className="absolute inset-0 rounded-full bg-red-500/20 motion-safe:animate-ping"
+                aria-hidden="true"
+              />
+              <div
+                className="absolute -inset-4 rounded-full bg-orange-500/10 motion-safe:animate-pulse"
+                aria-hidden="true"
+              />
             </>
           )}
 
@@ -172,7 +101,11 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
                 ? "bg-red-600 text-white shadow-red-500/30 ring-4 ring-red-500/20"
                 : "bg-orange-500 hover:bg-orange-400 text-slate-950 shadow-orange-500/20 ring-4 ring-slate-800"
             } ${isProcessing ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
-            aria-label={isRecording ? "रिकॉर्डिंग रोकें (Stop Recording)" : "माइक से सवाल पूछें (Start Recording)"}
+            aria-label={
+              isRecording
+                ? "रिकॉर्डिंग रोकें (Stop Recording)"
+                : "माइक से सवाल पूछें (Start Recording)"
+            }
           >
             {isProcessing ? (
               <Loader2 className="w-8 h-8 motion-safe:animate-spin text-white" aria-hidden="true" />
@@ -188,7 +121,10 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
           <h3 className="font-semibold text-base text-white">
             {isRecording ? (
               <span>
-                सुन रहे हैं... <span className="tabular-nums font-mono font-medium">({recordingDuration}s)</span>
+                सुन रहे हैं...{" "}
+                <span className="tabular-nums font-mono font-medium">
+                  ({recordingDuration}s)
+                </span>
               </span>
             ) : isProcessing ? (
               "जानकारी जांची जा रही है..."
@@ -203,24 +139,13 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
           </p>
         </div>
 
-        {/* Live Audio Visualizer */}
-        {isRecording && (
-          <div className="flex items-center space-x-1 mt-4 h-5" aria-hidden="true">
-            {[30, 60, 90, 40, 80, 100, 70, 50, 85, 30].map((h, i) => (
-              <div
-                key={i}
-                className="w-1 bg-orange-400 rounded-full motion-safe:animate-bounce"
-                style={{
-                  height: `${h}%`,
-                  animationDuration: `${0.4 + (i % 4) * 0.15}s`,
-                }}
-              />
-            ))}
-          </div>
-        )}
+        <AudioVisualizer isRecording={isRecording} />
 
         {recordingError && (
-          <div className="mt-4 p-3 rounded-lg bg-red-950/40 border border-red-800/40 text-red-300 text-xs max-w-md" role="alert">
+          <div
+            className="mt-4 p-3 rounded-lg bg-red-950/40 border border-red-800/40 text-red-300 text-xs max-w-md"
+            role="alert"
+          >
             {recordingError}
           </div>
         )}
