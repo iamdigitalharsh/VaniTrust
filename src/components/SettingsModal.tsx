@@ -12,6 +12,8 @@ interface SettingsModalProps {
   onSaveFailproofKey: (key: string) => void;
   tavilyKey: string;
   onSaveTavilyKey: (key: string) => void;
+  geminiKey?: string;
+  onSaveGeminiKey?: (key: string) => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -23,10 +25,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onSaveFailproofKey,
   tavilyKey,
   onSaveTavilyKey,
+  geminiKey = "",
+  onSaveGeminiKey,
 }) => {
   const [localSarvam, setLocalSarvam] = useState(sarvamKey);
   const [localFailproof, setLocalFailproof] = useState(failproofKey);
   const [localTavily, setLocalTavily] = useState(tavilyKey);
+  const [localGemini, setLocalGemini] = useState(geminiKey);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const firstInputRef = useRef<HTMLInputElement | null>(null);
@@ -49,6 +54,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onSaveSarvamKey(localSarvam.trim());
     onSaveFailproofKey(localFailproof.trim());
     onSaveTavilyKey(localTavily.trim());
+    if (onSaveGeminiKey) {
+      onSaveGeminiKey(localGemini.trim());
+    }
     setSavedSuccess(true);
     setTimeout(() => {
       setSavedSuccess(false);
@@ -63,7 +71,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       aria-modal="true"
       aria-labelledby="settings-title"
     >
-      <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl">
+      <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-4 border-b border-slate-800">
           <div className="flex items-center space-x-2">
             <Key className="w-5 h-5 text-orange-400" aria-hidden="true" />
@@ -97,6 +105,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               placeholder="e.g. sk_..."
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="gemini-key-input"
+              className="text-xs font-semibold text-slate-200 block mb-1"
+            >
+              Google Gemini / Gemma Key (ASR Backup & Open-Weights Reasoner)
+            </label>
+            <input
+              id="gemini-key-input"
+              type="password"
+              value={localGemini}
+              onChange={(e) => setLocalGemini(e.target.value)}
+              placeholder="e.g. AIzaSy..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <p className="text-xs text-slate-400 mt-1">
+              Provides backup voice transcription and open-weights claim verification.
+            </p>
           </div>
 
           <div>

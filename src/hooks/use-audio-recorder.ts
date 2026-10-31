@@ -5,12 +5,14 @@ import { useState, useRef, useEffect, useCallback } from "react";
 interface UseAudioRecorderOptions {
   selectedLanguage: string;
   sarvamKey?: string;
+  geminiKey?: string;
   onTranscriptionComplete: (transcript: string, language: string) => void;
 }
 
 export function useAudioRecorder({
   selectedLanguage,
   sarvamKey = "",
+  geminiKey = "",
   onTranscriptionComplete,
 }: UseAudioRecorderOptions) {
   const [isRecording, setIsRecording] = useState(false);
@@ -36,6 +38,9 @@ export function useAudioRecorder({
         if (sarvamKey) {
           formData.append("sarvamKey", sarvamKey);
         }
+        if (geminiKey) {
+          formData.append("geminiKey", geminiKey);
+        }
 
         const res = await fetch("/api/transcribe", {
           method: "POST",
@@ -54,7 +59,7 @@ export function useAudioRecorder({
         setRecordingError(err.message || "Failed to transcribe audio.");
       }
     },
-    [selectedLanguage, sarvamKey, onTranscriptionComplete]
+    [selectedLanguage, sarvamKey, geminiKey, onTranscriptionComplete]
   );
 
   const startRecording = useCallback(async () => {

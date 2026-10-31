@@ -9,6 +9,7 @@ interface AudioRecorderProps {
   onTranscriptionComplete: (transcript: string, language: string) => void;
   isProcessing: boolean;
   sarvamKey: string;
+  geminiKey?: string;
 }
 
 const INDIAN_LANGUAGES = [
@@ -25,6 +26,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   onTranscriptionComplete,
   isProcessing,
   sarvamKey,
+  geminiKey = "",
 }) => {
   const [selectedLanguage, setSelectedLanguage] = useState("hi-IN");
   const [manualText, setManualText] = useState("");
@@ -38,6 +40,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   } = useAudioRecorder({
     selectedLanguage,
     sarvamKey,
+    geminiKey,
     onTranscriptionComplete,
   });
 

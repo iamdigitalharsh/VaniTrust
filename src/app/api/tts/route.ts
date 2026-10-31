@@ -11,34 +11,40 @@ export async function POST(req: NextRequest) {
     }
 
     const safeText = text.trim().substring(0, 600);
-
     const sarvam = new SarvamService(sarvamKey);
 
-    if (!sarvam.hasKey()) {
-      return NextResponse.json(
-        {
-          error: "SARVAM_API_KEY_MISSING",
-          message: "Sarvam API Key is required to generate Bulbul voice audio.",
-        },
-        { status: 401 }
-      );
+    // If Sarvam key is provided, attempt high-fidelity Bulbul regional synthesis
+    if (sarvam.hasKey()) {
+      try {
+        const result = await sarvam.textToSpeech(safeText, {
+          languageCode: languageCode || "hi-IN",
+          speaker: speaker || "ritu",
+          pace: pace || 1.0,
+        });
+
+        if (result && result.audioBase64) {
+          return NextResponse.json({
+            audioBase64: result.audioBase64,
+            provider: "Sarvam Bulbul TTS",
+          });
+        }
+      } catch (sarvamErr: any) {
+        console.warn("Sarvam TTS error (e.g. quota limit), activating client Web Speech fallback:", sarvamErr.message);
+      }
     }
 
-    const result = await sarvam.textToSpeech(safeText, {
-      languageCode: languageCode || "hi-IN",
-      speaker: speaker || "ritu",
-      pace: pace || 1.0,
-    });
-
+    // Graceful fallback: return 200 so the client smoothly falls back to browser Web Speech API
     return NextResponse.json({
-      audioBase64: result.audioBase64,
-      provider: "Sarvam Bulbul TTS",
+      fallback: true,
+      provider: "Browser Web Speech Engine (Fallback)",
+      message: "Sarvam voice quota unavailable; activating client-side regional synthesis.",
     });
   } catch (err: any) {
     console.error("TTS API error:", err);
-    return NextResponse.json(
-      { error: "TTS generation failed", details: err.message },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      fallback: true,
+      provider: "Browser Web Speech Engine (Fallback)",
+      details: err.message,
+    });
   }
 }

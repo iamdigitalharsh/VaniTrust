@@ -13,6 +13,7 @@ import { ShieldCheck, HelpCircle } from "lucide-react";
 
 export default function Home() {
   const [sarvamKey, setSarvamKey] = useState<string>("");
+  const [geminiKey, setGeminiKey] = useState<string>("");
   const [failproofKey, setFailproofKey] = useState<string>("");
   const [tavilyKey, setTavilyKey] = useState<string>("");
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -29,9 +30,11 @@ export default function Home() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedSarvam = localStorage.getItem("SARVAM_API_KEY") || "";
+      const savedGemini = localStorage.getItem("GEMINI_API_KEY") || "";
       const savedFailproof = localStorage.getItem("FAILPROOF_API_KEY") || "";
       const savedTavily = localStorage.getItem("TAVILY_API_KEY") || "";
       setSarvamKey(savedSarvam);
+      setGeminiKey(savedGemini);
       setFailproofKey(savedFailproof);
       setTavilyKey(savedTavily);
     }
@@ -41,6 +44,13 @@ export default function Home() {
     setSarvamKey(key);
     if (typeof window !== "undefined") {
       localStorage.setItem("SARVAM_API_KEY", key);
+    }
+  };
+
+  const handleSaveGeminiKey = (key: string) => {
+    setGeminiKey(key);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("GEMINI_API_KEY", key);
     }
   };
 
@@ -77,6 +87,7 @@ export default function Home() {
           query: transcript,
           failproofKey,
           tavilyKey,
+          gemmaKey: geminiKey,
         }),
       });
 
@@ -120,7 +131,7 @@ export default function Home() {
         }
       }
 
-      // 2. Client-side browser Web Speech fallback if server TTS is unconfigured
+      // 2. Client-side browser Web Speech fallback if server TTS is unconfigured or quota reached
       if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
@@ -143,7 +154,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-[#0b0f19] text-slate-100">
       <Navbar
         onOpenSettings={() => setIsSettingsOpen(true)}
-        hasCustomKey={Boolean(sarvamKey || tavilyKey || failproofKey)}
+        hasCustomKey={Boolean(sarvamKey || geminiKey || tavilyKey || failproofKey)}
       />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -159,8 +170,8 @@ export default function Home() {
 
         {/* Popular Questions Carousel / Grid */}
         <SampleQueries
-          onSelectScenario={handleSelectScenario}
           selectedId={selectedScenarioId}
+          onSelectScenario={handleSelectScenario}
           isProcessing={isProcessing}
         />
 
@@ -172,6 +183,7 @@ export default function Home() {
               onTranscriptionComplete={handleTranscriptionComplete}
               isProcessing={isProcessing}
               sarvamKey={sarvamKey}
+              geminiKey={geminiKey}
             />
 
             <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800 text-slate-400 text-xs flex items-start space-x-2.5">
@@ -225,6 +237,8 @@ export default function Home() {
         onClose={() => setIsSettingsOpen(false)}
         sarvamKey={sarvamKey}
         onSaveSarvamKey={handleSaveSarvamKey}
+        geminiKey={geminiKey}
+        onSaveGeminiKey={handleSaveGeminiKey}
         failproofKey={failproofKey}
         onSaveFailproofKey={handleSaveFailproofKey}
         tavilyKey={tavilyKey}
