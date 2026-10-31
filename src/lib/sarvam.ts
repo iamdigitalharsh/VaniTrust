@@ -74,7 +74,7 @@ export class SarvamService {
     const payload = {
       inputs: [text],
       target_language_code: options?.languageCode || "hi-IN",
-      speaker: options?.speaker || "anushka",
+      speaker: options?.speaker || "ritu",
       pitch: 0,
       pace: options?.pace || 1.0,
       loudness: 1.5,

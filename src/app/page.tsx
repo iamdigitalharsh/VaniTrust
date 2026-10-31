@@ -104,7 +104,7 @@ export default function Home() {
         body: JSON.stringify({
           text: textToSpeak,
           languageCode: "hi-IN",
-          speaker: "anushka",
+          speaker: "ritu",
           sarvamKey,
         }),
       });

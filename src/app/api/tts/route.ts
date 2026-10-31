@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     const result = await sarvam.textToSpeech(text, {
       languageCode: languageCode || "hi-IN",
-      speaker: speaker || "meera",
+      speaker: speaker || "ritu",
       pace: pace || 1.0,
     });
 
@@ -40,4 +40,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
