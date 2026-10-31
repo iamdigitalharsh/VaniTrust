@@ -14,6 +14,7 @@ import { ShieldCheck, HelpCircle } from "lucide-react";
 export default function Home() {
   const [sarvamKey, setSarvamKey] = useState<string>("");
   const [failproofKey, setFailproofKey] = useState<string>("");
+  const [tavilyKey, setTavilyKey] = useState<string>("");
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
 
   // Active query & verification state
@@ -29,8 +30,10 @@ export default function Home() {
     if (typeof window !== "undefined") {
       const savedSarvam = localStorage.getItem("SARVAM_API_KEY") || "";
       const savedFailproof = localStorage.getItem("FAILPROOF_API_KEY") || "";
+      const savedTavily = localStorage.getItem("TAVILY_API_KEY") || "";
       setSarvamKey(savedSarvam);
       setFailproofKey(savedFailproof);
+      setTavilyKey(savedTavily);
     }
   }, []);
 
@@ -45,6 +48,13 @@ export default function Home() {
     setFailproofKey(key);
     if (typeof window !== "undefined") {
       localStorage.setItem("FAILPROOF_API_KEY", key);
+    }
+  };
+
+  const handleSaveTavilyKey = (key: string) => {
+    setTavilyKey(key);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("TAVILY_API_KEY", key);
     }
   };
 
@@ -66,6 +76,7 @@ export default function Home() {
         body: JSON.stringify({
           query: transcript,
           failproofKey,
+          tavilyKey,
         }),
       });
 
@@ -131,7 +142,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-[#0b0f19] text-slate-100">
       <Navbar
         onOpenSettings={() => setIsSettingsOpen(true)}
-        hasCustomKey={Boolean(sarvamKey)}
+        hasCustomKey={Boolean(sarvamKey || tavilyKey || failproofKey)}
       />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -215,6 +226,8 @@ export default function Home() {
         onSaveSarvamKey={handleSaveSarvamKey}
         failproofKey={failproofKey}
         onSaveFailproofKey={handleSaveFailproofKey}
+        tavilyKey={tavilyKey}
+        onSaveTavilyKey={handleSaveTavilyKey}
       />
     </div>
   );

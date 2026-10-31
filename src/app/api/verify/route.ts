@@ -4,13 +4,12 @@ import { FailproofService } from "@/lib/failproof";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { query, rawResponse, contextCategory, failproofKey } = body;
+    const { query, rawResponse, contextCategory, failproofKey, tavilyKey } = body;
 
     if (!query) {
       return NextResponse.json({ error: "Query is required for verification." }, { status: 400 });
     }
 
-    // Default simulated unverified LLM output if user provides only the raw question
     let responseToTest = rawResponse;
     if (!responseToTest) {
       const q = query.toLowerCase();
@@ -25,7 +24,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const failproof = new FailproofService(failproofKey);
+    const failproof = new FailproofService(failproofKey, undefined, tavilyKey);
     const report = await failproof.verifyResponse(query, responseToTest, contextCategory);
 
     return NextResponse.json(report);
@@ -37,4 +36,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

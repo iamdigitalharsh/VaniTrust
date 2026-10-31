@@ -338,3 +338,4 @@ After building UI:
 - [ ] Follows the project's design system (spacing, colors, typography)
 - [ ] The rendered result passes a final UI-specific finish-gate review
 - [ ] No accessibility warnings in dev tools or axe-core
+

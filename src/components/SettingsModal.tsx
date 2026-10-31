@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { X, Key, Check, Save } from "lucide-react";
+import { X, Key, Check, Save, ExternalLink } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -10,6 +10,8 @@ interface SettingsModalProps {
   onSaveSarvamKey: (key: string) => void;
   failproofKey: string;
   onSaveFailproofKey: (key: string) => void;
+  tavilyKey: string;
+  onSaveTavilyKey: (key: string) => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -19,14 +21,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onSaveSarvamKey,
   failproofKey,
   onSaveFailproofKey,
+  tavilyKey,
+  onSaveTavilyKey,
 }) => {
   const [localSarvam, setLocalSarvam] = useState(sarvamKey);
   const [localFailproof, setLocalFailproof] = useState(failproofKey);
+  const [localTavily, setLocalTavily] = useState(tavilyKey);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const firstInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Focus management & Escape key handling
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => firstInputRef.current?.focus(), 50);
@@ -44,6 +48,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     e.preventDefault();
     onSaveSarvamKey(localSarvam.trim());
     onSaveFailproofKey(localFailproof.trim());
+    onSaveTavilyKey(localTavily.trim());
     setSavedSuccess(true);
     setTimeout(() => {
       setSavedSuccess(false);
@@ -92,6 +97,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               placeholder="e.g. sk_..."
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label
+                htmlFor="tavily-key-input"
+                className="text-xs font-semibold text-slate-200 block"
+              >
+                Tavily Search Key (Live Web Fact-Checking)
+              </label>
+              <a
+                href="https://tavily.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-orange-400 hover:underline inline-flex items-center space-x-0.5"
+              >
+                <span>Code: SHIPHAPPENS</span>
+                <ExternalLink className="w-3 h-3 ml-0.5" aria-hidden="true" />
+              </a>
+            </div>
+            <input
+              id="tavily-key-input"
+              type="password"
+              value={localTavily}
+              onChange={(e) => setLocalTavily(e.target.value)}
+              placeholder="e.g. tvly-..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <p className="text-xs text-slate-400 mt-1">
+              Powers real-time search across Indian government portals (.gov.in).
+            </p>
           </div>
 
           <div>
