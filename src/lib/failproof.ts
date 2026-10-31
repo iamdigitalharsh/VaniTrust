@@ -1,21 +1,24 @@
 import { TrustReport, VerifiedClaim } from "@/types";
 import { TavilyService } from "./tavily";
+import { GemmaService } from "./gemma";
 
 /**
  * Failproof AI Verification & Reliability Engine
  * Evaluates claims, flags cross-lingual drift & hallucinations, and enforces truth guardrails.
- * Supported by Tavily AI Search for live web grounding.
+ * Supported by Gemma Open-Weights Model and Tavily AI Search for live web grounding.
  */
 
 export class FailproofService {
   private apiKey: string;
   private endpoint: string;
   private tavilyService: TavilyService;
+  private gemmaService: GemmaService;
 
-  constructor(apiKey?: string, endpoint?: string, tavilyKey?: string) {
+  constructor(apiKey?: string, endpoint?: string, tavilyKey?: string, gemmaKey?: string) {
     this.apiKey = apiKey || process.env.FAILPROOF_API_KEY || "";
     this.endpoint = endpoint || process.env.FAILPROOF_ENDPOINT || "https://api.failproof.ai/v1/verify";
     this.tavilyService = new TavilyService(tavilyKey);
+    this.gemmaService = new GemmaService(gemmaKey);
   }
 
   hasKey(): boolean {
@@ -65,7 +68,47 @@ export class FailproofService {
       }
     }
 
-    // 2. Intelligent Rule-Based Checking for Core Pilot Schemes
+    // 2. Open-Weights Verification with Gemma (when key configured)
+    if (this.gemmaService.hasKey()) {
+      try {
+        const gemmaResult = await this.gemmaService.verifyAndSanitize(query, rawResponse);
+        if (gemmaResult) {
+          const claims: VerifiedClaim[] = gemmaResult.flaggedClaims.map((item, idx) => ({
+            id: `claim-gemma-${idx + 1}`,
+            claim: item.claim,
+            status: gemmaResult.isHallucination ? "hallucination" : "verified",
+            confidence: 96,
+            sourceAuthority: "Gemma Open-Weights Cross-Lingual Guardrail",
+            verdictReason: `${item.issue}. Ground truth: ${item.groundTruth}`,
+          }));
+
+          return {
+            overallTrustScore: gemmaResult.trustScore,
+            status: gemmaResult.trustScore < 50 ? "critical_blocked" : (gemmaResult.trustScore < 80 ? "warning" : "safe"),
+            claims: claims.length > 0 ? claims : [
+              {
+                id: "claim-gemma-1",
+                claim: "General Claim Evaluation",
+                status: gemmaResult.isHallucination ? "hallucination" : "verified",
+                confidence: 92,
+                sourceAuthority: "Gemma Open-Weights Reasoner",
+                verdictReason: gemmaResult.reasoning,
+              }
+            ],
+            hallucinationsIntercepted: gemmaResult.isHallucination ? (claims.length || 1) : 0,
+            unverifiedText: rawResponse,
+            sanitizedSafeText: gemmaResult.sanitizedText,
+            verificationSource: "Gemma Open-Weights Model Engine",
+            timestamp: new Date().toLocaleTimeString(),
+            latencyMs: Date.now() - startTime,
+          };
+        }
+      } catch (err) {
+        console.warn("Gemma verification failed, continuing to rule & web engine:", err);
+      }
+    }
+
+    // 3. Intelligent Rule-Based Checking for Core Pilot Schemes
     const localResult = this.checkCorePilotRules(query, rawResponse, startTime);
     if (localResult) {
       return localResult;

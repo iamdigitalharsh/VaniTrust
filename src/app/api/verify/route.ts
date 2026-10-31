@@ -4,7 +4,7 @@ import { FailproofService } from "@/lib/failproof";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { query, rawResponse, contextCategory, failproofKey, tavilyKey } = body;
+    const { query, rawResponse, contextCategory, failproofKey, tavilyKey, gemmaKey } = body;
 
     if (!query) {
       return NextResponse.json({ error: "Query is required for verification." }, { status: 400 });
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const failproof = new FailproofService(failproofKey, undefined, tavilyKey);
+    const failproof = new FailproofService(failproofKey, undefined, tavilyKey, gemmaKey);
     const report = await failproof.verifyResponse(query, responseToTest, contextCategory);
 
     return NextResponse.json(report);
