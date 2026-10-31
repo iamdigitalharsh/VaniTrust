@@ -97,18 +97,19 @@ export default function Home() {
     setIsPlayingVoice(true);
 
     try {
-      if (sarvamKey) {
-        const res = await fetch("/api/tts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            text: textToSpeak,
-            languageCode: "hi-IN",
-            speaker: "meera",
-            sarvamKey,
-          }),
-        });
+      // 1. Attempt Sarvam Bulbul TTS via backend (reads Vercel env secrets or client override)
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: textToSpeak,
+          languageCode: "hi-IN",
+          speaker: "meera",
+          sarvamKey,
+        }),
+      });
 
+      if (res.ok) {
         const data = await res.json();
         if (data.audioBase64) {
           const audio = new Audio(`data:audio/wav;base64,${data.audioBase64}`);
@@ -119,7 +120,7 @@ export default function Home() {
         }
       }
 
-      // Browser Web Speech API fallback
+      // 2. Client-side browser Web Speech fallback if server TTS is unconfigured
       if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
