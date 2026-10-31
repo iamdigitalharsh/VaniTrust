@@ -30,7 +30,7 @@ export const SampleQueries: React.FC<SampleQueriesProps> = ({
   return (
     <div className="space-y-3">
       <div className="flex items-center space-x-2">
-        <HelpCircle className="w-4 h-4 text-orange-400" />
+        <HelpCircle className="w-4 h-4 text-orange-400" aria-hidden="true" />
         <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
           अक्सर पूछे जाने वाले सवाल (Common Questions)
         </h3>
@@ -46,7 +46,7 @@ export const SampleQueries: React.FC<SampleQueriesProps> = ({
               key={scenario.id}
               onClick={() => onSelectScenario(scenario)}
               disabled={isProcessing}
-              className={`p-4 rounded-xl border text-left transition-all duration-200 flex flex-col justify-between group ${
+              className={`p-4 rounded-xl border text-left transition-colors duration-150 flex flex-col justify-between group focus:outline-none focus:ring-2 focus:ring-orange-500/50 ${
                 isSelected
                   ? "bg-orange-950/20 border-orange-500/50 ring-1 ring-orange-500/30"
                   : "bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900"
@@ -54,11 +54,11 @@ export const SampleQueries: React.FC<SampleQueriesProps> = ({
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="inline-flex items-center space-x-1 text-[10px] font-semibold text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">
-                    <Icon className="w-3 h-3 text-orange-400" />
+                  <span className="inline-flex items-center space-x-1 text-xs font-medium text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded">
+                    <Icon className="w-3.5 h-3.5 text-orange-400" aria-hidden="true" />
                     <span>{scenario.category}</span>
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-xs text-slate-400">
                     {scenario.language}
                   </span>
                 </div>
@@ -68,9 +68,9 @@ export const SampleQueries: React.FC<SampleQueriesProps> = ({
                 </p>
               </div>
 
-              <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-orange-400">
-                <span className="font-medium">क्लिक करके जांचें</span>
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs text-orange-400">
+                <span className="font-semibold">क्लिक करके जांचें</span>
+                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
               </div>
             </button>
           );

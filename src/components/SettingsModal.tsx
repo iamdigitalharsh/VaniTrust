@@ -38,61 +38,64 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl">
         <div className="flex items-center justify-between pb-4 border-b border-slate-800">
           <div className="flex items-center space-x-2">
-            <Key className="w-5 h-5 text-orange-400" />
-            <h3 className="font-bold text-base text-white">API Configuration</h3>
+            <Key className="w-5 h-5 text-orange-400" aria-hidden="true" />
+            <h3 id="settings-title" className="font-bold text-base text-white">API Configuration</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+            aria-label="Close settings dialog"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         <form onSubmit={handleSave} className="mt-4 space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-200 block mb-1">
+            <label htmlFor="sarvam-key-input" className="text-xs font-semibold text-slate-200 block mb-1">
               Sarvam AI Key (Vernacular Speech & Audio)
             </label>
             <input
+              id="sarvam-key-input"
               type="password"
               value={localSarvam}
               onChange={(e) => setLocalSarvam(e.target.value)}
               placeholder="e.g. sk_..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-orange-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-200 block mb-1">
+            <label htmlFor="failproof-key-input" className="text-xs font-semibold text-slate-200 block mb-1">
               Failproof Verification Key (Optional)
             </label>
             <input
+              id="failproof-key-input"
               type="password"
               value={localFailproof}
               onChange={(e) => setLocalFailproof(e.target.value)}
               placeholder="e.g. fp_..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-orange-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           <div className="pt-3 border-t border-slate-800 flex items-center justify-end">
             <button
               type="submit"
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-semibold text-xs transition-colors"
+              className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-bold text-xs transition-colors active:scale-[0.96]"
             >
               {savedSuccess ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-300" />
+                  <Check className="w-4 h-4 text-emerald-800" aria-hidden="true" />
                   <span>Saved!</span>
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
+                  <Save className="w-4 h-4" aria-hidden="true" />
                   <span>Save</span>
                 </>
               )}

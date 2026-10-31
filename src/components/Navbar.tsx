@@ -15,18 +15,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSettings, hasCustomKey }) 
         {/* Brand */}
         <div className="flex items-center space-x-3">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400">
-            <ShieldCheck className="w-5 h-5 text-orange-400" />
+            <ShieldCheck className="w-5 h-5 text-orange-400" aria-hidden="true" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
               <span className="font-bold text-lg text-white tracking-tight">
                 Vani<span className="text-orange-400">Trust</span>
               </span>
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">
                 सत्य-वाणी
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 hidden sm:block">
+            <p className="text-xs text-slate-400 hidden sm:block">
               Verified Voice Assistant for Public Services & Schemes
             </p>
           </div>
@@ -34,20 +34,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSettings, hasCustomKey }) 
 
         {/* Right Actions */}
         <div className="flex items-center space-x-3">
-          <div className="hidden sm:flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-700/40 text-[11px] text-emerald-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="hidden sm:flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-700/40 text-xs text-emerald-300">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 motion-safe:animate-pulse" aria-hidden="true" />
             <span>Official Fact-Check Active</span>
           </div>
 
           <button
             onClick={onOpenSettings}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition-colors"
-            title="Configure API Settings"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+            aria-label="API Settings configuration"
           >
-            <Settings className="w-3.5 h-3.5" />
+            <Settings className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden sm:inline">Settings</span>
             {hasCustomKey && (
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
             )}
           </button>
         </div>

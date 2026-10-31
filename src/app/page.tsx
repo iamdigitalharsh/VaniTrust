@@ -180,7 +180,7 @@ export default function Home() {
                 isPlayingVoice={isPlayingVoice}
               />
             ) : (
-              <div className="h-72 rounded-2xl border border-dashed border-slate-800 flex flex-col items-center justify-center text-center p-6 text-slate-500">
+              <div className="min-h-[18rem] rounded-2xl border border-dashed border-slate-800 flex flex-col items-center justify-center text-center p-6 text-slate-500">
                 <HelpCircle className="w-10 h-10 mb-2 text-slate-700" />
                 <p className="text-sm font-medium text-slate-400">कोई सवाल सक्रिय नहीं है</p>
                 <p className="text-xs text-slate-500 mt-1">

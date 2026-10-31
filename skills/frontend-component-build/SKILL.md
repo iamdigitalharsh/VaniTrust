@@ -115,3 +115,4 @@ Before shipping any component:
 1. Run `npm run build` to verify strict TypeScript and JSX compilation.
 2. Resize viewport from 375px (mobile) to 1440px (desktop) to guarantee zero horizontal overflow.
 3. Verify that removing mock data displays the empty state cleanly without rendering `undefined` or crashing.
+
