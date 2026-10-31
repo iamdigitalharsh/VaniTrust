@@ -10,7 +10,7 @@ export interface SarvamSTTOptions {
 
 export interface SarvamTTSOptions {
   languageCode?: string;
-  speaker?: "meera" | "pavithra" | "maitreyi" | "arvind" | "amol" | "amartya";
+  speaker?: string;
   pace?: number;
 }
 
@@ -74,13 +74,13 @@ export class SarvamService {
     const payload = {
       inputs: [text],
       target_language_code: options?.languageCode || "hi-IN",
-      speaker: options?.speaker || "meera",
+      speaker: options?.speaker || "anushka",
       pitch: 0,
       pace: options?.pace || 1.0,
       loudness: 1.5,
       speech_sample_rate: 8000,
       enable_preprocessing: true,
-      model: "bulbul:v1",
+      model: "bulbul:v3",
     };
 
     const response = await fetch(`${this.baseUrl}/text-to-speech`, {
