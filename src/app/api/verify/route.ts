@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { FailproofService } from "@/lib/failproof";
+import { validateQuery } from "@/lib/query-validator";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { query, rawResponse, contextCategory, failproofKey, tavilyKey, gemmaKey } = body;
 
-    if (!query) {
+    if (!query || typeof query !== "string" || query.trim().length === 0) {
       return NextResponse.json({ error: "Query is required for verification." }, { status: 400 });
+    }
+
+    // 1. Pre-Search Validation: Filter out greetings, short fillers, and nonsensical queries
+    // Prevents wasting Tavily search credits, Gemma tokens, and Failproof quota.
+    const validation = validateQuery(query);
+    if (!validation.isValid && validation.feedbackReport) {
+      return NextResponse.json(validation.feedbackReport);
     }
 
     let responseToTest = rawResponse;

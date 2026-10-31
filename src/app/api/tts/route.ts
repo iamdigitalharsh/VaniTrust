@@ -6,9 +6,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { text, languageCode, speaker, pace, sarvamKey } = body;
 
-    if (!text || text.trim().length === 0) {
+    if (!text || typeof text !== "string" || text.trim().length === 0) {
       return NextResponse.json({ error: "Text is required for TTS." }, { status: 400 });
     }
+
+    const safeText = text.trim().substring(0, 600);
 
     const sarvam = new SarvamService(sarvamKey);
 
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await sarvam.textToSpeech(text, {
+    const result = await sarvam.textToSpeech(safeText, {
       languageCode: languageCode || "hi-IN",
       speaker: speaker || "ritu",
       pace: pace || 1.0,

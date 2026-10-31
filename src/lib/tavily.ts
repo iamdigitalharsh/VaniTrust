@@ -32,9 +32,11 @@ export class TavilyService {
    * Search official government, medical, and news sources in real time
    */
   async search(query: string): Promise<TavilySearchResponse | null> {
-    if (!this.hasKey()) {
+    if (!this.hasKey() || !query || typeof query !== "string" || query.trim().length < 3) {
       return null;
     }
+
+    const cleanQuery = query.trim().substring(0, 250);
 
     try {
       const response = await fetch(`${this.baseUrl}/search`, {
@@ -44,7 +46,7 @@ export class TavilyService {
         },
         body: JSON.stringify({
           api_key: this.apiKey,
-          query: `${query} official government guidelines India`,
+          query: `${cleanQuery} official government guidelines India`,
           search_depth: "basic",
           include_answer: true,
           max_results: 3,

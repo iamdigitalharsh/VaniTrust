@@ -1,6 +1,7 @@
 import { TrustReport, VerifiedClaim } from "@/types";
 import { TavilyService } from "./tavily";
 import { GemmaService } from "./gemma";
+import { validateQuery } from "./query-validator";
 
 /**
  * Failproof AI Verification & Reliability Engine
@@ -30,6 +31,13 @@ export class FailproofService {
    */
   async verifyResponse(query: string, rawResponse: string, contextCategory?: string): Promise<TrustReport> {
     const startTime = Date.now();
+
+    // 0. Pre-Flight Input Validation: Filter greetings, pleasantries, noise, and non-actionable queries
+    // Prevents unnecessary calls to Tavily search, Gemma reasoning, or Failproof verification.
+    const validation = validateQuery(query, startTime);
+    if (!validation.isValid && validation.feedbackReport) {
+      return validation.feedbackReport;
+    }
 
     // 1. If live Failproof API key is present, attempt remote verification
     if (this.hasKey()) {

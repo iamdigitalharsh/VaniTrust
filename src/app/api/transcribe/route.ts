@@ -12,6 +12,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No audio file provided." }, { status: 400 });
     }
 
+    // Limit audio file size to 10MB to prevent memory exhaustion
+    const MAX_AUDIO_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_AUDIO_SIZE) {
+      return NextResponse.json(
+        { error: "Audio file too large. Maximum size allowed is 10MB." },
+        { status: 413 }
+      );
+    }
+
     const sarvam = new SarvamService(clientKey);
 
     if (!sarvam.hasKey()) {
@@ -42,4 +51,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

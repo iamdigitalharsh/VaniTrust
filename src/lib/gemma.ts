@@ -73,10 +73,13 @@ ${groundingContext ? `Official Grounding Context: "${groundingContext}"` : ""}`;
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: systemPrompt }],
+          },
           contents: [
             {
               role: "user",
-              parts: [{ text: `${systemPrompt}\n\n${userContent}` }],
+              parts: [{ text: userContent }],
             },
           ],
           generationConfig: {
@@ -149,3 +152,4 @@ ${groundingContext ? `Official Grounding Context: "${groundingContext}"` : ""}`;
     }
   }
 }
+
