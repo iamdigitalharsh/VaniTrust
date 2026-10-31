@@ -8,7 +8,7 @@ Built for **Ship Happens Hackathon** (Delhi NCR / Gurugram)
 ---
 
 ## 💡 The Core Problem: Why Indian GenAI Hallucinates Dangerously
-Generative AI and speech models in Indic languages (Hindi, Marathi, Tamil, Bengali, Hinglish) face severe token scarcity. In high stakes domains—such as **Ayushman Bharat healthcare eligibility**, **PM-Kisan farm subsidies**, and **pediatric medicine** LLMs hallucinate inflated figures, non-existent schemes, and lethal dosages with alarming confidence.
+Generative AI and speech models in Indic languages (Hindi, Marathi, Tamil, Bengali, Hinglish) face severe token scarcity. In high stakes domains such as **Ayushman Bharat healthcare eligibility**, **PM-Kisan farm subsidies**, and **pediatric medicine** LLMs hallucinate inflated figures, non-existent schemes, and lethal dosages with alarming confidence.
 
 **VaniTrust** solves this by inserting an active **Failproof Verification HUD** directly between **Sarvam Saarika ASR** (voice input) and **Sarvam Bulbul TTS** (voice output).
 
