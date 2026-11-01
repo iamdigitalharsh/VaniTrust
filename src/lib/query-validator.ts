@@ -1,19 +1,18 @@
-import { TrustReport } from "../types";
+import { TrustReport } from "@/types";
 
 /**
  * Validates user queries before invoking expensive search (Tavily), reasoning (Gemma),
  * or verification pipelines (Failproof).
  *
- * Filters out:
- * - Common greetings & pleasantries (Hindi, Hinglish, English)
- * - Conversational fillers & general bot questions ("who are you", "kaise ho")
- * - Unclear, single-word, or gibberish inputs
- * - Excessively long strings (enforces length bounds)
+ * Enforces:
+ * 1. Strict Domain Specificity (Only Government Schemes, Subsidies, Civic Rights & Healthcare)
+ * 2. Conversational & Greeting Filters (Hindi, Hinglish, English)
+ * 3. Gibberish & Input Length Bounds
  */
 
 export interface ValidationOutcome {
   isValid: boolean;
-  type: "actionable" | "greeting" | "too_short" | "gibberish" | "too_long";
+  type: "actionable" | "greeting" | "out_of_domain" | "too_short" | "gibberish" | "too_long";
   feedbackReport?: TrustReport;
 }
 
@@ -83,7 +82,6 @@ const GREETINGS_EXACT = new Set([
   "चेक",
 ]);
 
-// Substring triggers for greetings and introductory phrases
 const GREETING_PHRASES = [
   "who are you",
   "what can you do",
@@ -99,6 +97,85 @@ const GREETING_PHRASES = [
   "आप क्या कर सकते हो",
   "तुम क्या कर सकते हो",
   "मुझे मदद चाहिए",
+];
+
+// Out-of-Domain Keywords and Topics (Sports, Celebrities, Entertainment, Cooking, Jokes, Coding, Foreign Trivia)
+interface OutOfDomainRule {
+  category: string;
+  keywords: string[];
+}
+
+const OUT_OF_DOMAIN_RULES: OutOfDomainRule[] = [
+  {
+    category: "खेल एवं खिलाड़ी (Sports & Cricket)",
+    keywords: [
+      "dhoni", "dhone", "ms dhoni", "m s dhoni", "mahendra singh dhoni",
+      "kohli", "virat kohli", "rohit sharma", "sachin", "tendulkar", "bumrah",
+      "hardik pandya", "kl rahul", "cricket", "ipl", "bcci", "football",
+      "messi", "ronaldo", "fifa", "world cup", "t20", "stadium", "batsman",
+      "bowler", "wicket", "tennis", "badminton", "olympics", "match score",
+      "धोनी", "विराट कोहली", "रोहित शर्मा", "सचिन", "क्रिकेट", "आईपीएल",
+      "फुटबॉल", "विश्व कप", "खिलाड़ी", "रन", "विकेट",
+    ],
+  },
+  {
+    category: "मनोरंजन एवं सिनेमा (Entertainment & Bollywood)",
+    keywords: [
+      "bollywood", "hollywood", "movie", "movies", "film", "films", "cinema",
+      "actor", "actress", "hero", "heroine", "shah rukh", "shahrukh", "srk",
+      "salman khan", "aamir khan", "deepika", "alia bhatt", "ranbir", "song",
+      "songs", "singer", "netflix", "trailer", "box office", "dance",
+      "फिल्म", "सिनेमा", "गाना", "गाने", "गायक", "अभिनेता", "अभिनेत्री", "शाहरुख",
+      "सलमान खान", "मूवी", "नाच", "गाने सुनाओ",
+    ],
+  },
+  {
+    category: "खान-पान एवं रेसिपी (Food & Cooking)",
+    keywords: [
+      "recipe", "recipes", "cook", "cooking", "biryani", "pizza", "burger", "cake",
+      "restaurant", "रेसिपी", "खाना कैसे बनाएं", "बिरयानी", "व्यंजन", "समोसा",
+    ],
+  },
+  {
+    category: "मनोरंजक गपशप, चुटकुले एवं ज्योतिष (Jokes, Poetry & Astrology)",
+    keywords: [
+      "joke", "jokes", "chutkula", "chutkule", "shayari", "poem", "poetry",
+      "horoscope", "kundali", "rashi", "zodiac", "astrology",
+      "चुटकला", "चुटकुले", "शायरी", "कविता", "राशिफल", "कुंडली", "ग्रह",
+    ],
+  },
+  {
+    category: "सॉफ्टवेयर कोडिंग एवं सामान्य ज्ञान (Coding & Trivia)",
+    keywords: [
+      "python code", "javascript code", "write a code", "write code", "html code",
+      "css code", "coding", "algorithm", "capital of", "president of usa",
+      "who invented", "speed of light", "capital of france", "dinosaur", "dinosaurs",
+      "मौसम कैसा है", "weather in",
+    ],
+  },
+];
+
+// Anchors indicating legitimate in-domain public welfare, civic, or healthcare intent
+const IN_DOMAIN_KEYWORDS = [
+  // Schemes & Government
+  "योजना", "yojana", "scheme", "सरकार", "sarkar", "govt", "government", "सब्सिडी", "subsidy",
+  "राशन", "ration", "पेंशन", "pension", "किसान", "kisan", "आयुष्मान", "ayushman", "pmay",
+  "आवास", "awas", "ladli", "लाडली", "उज्ज्वला", "ujjawala", "मजदूरी", "मनरेगा", "mgnrega",
+  "scholarship", "छात्रवृत्ति", "मुफ्त", "free", "रजिस्ट्रेशन", "apply", "form", "पोर्टल",
+  "portal", "गाइडलाइन", "guideline", "नियम", "rule", "गजट", "gazette", "अधिसूचना", "notification",
+  "अस्पताल", "hospital", "क्लीनिक", "clinic", "eligibility", "पात्रता", "किस्त", "installment",
+  "pm-jay", "pmjay", "nha", "csc",
+  // Healthcare, Pediatric & Medicine
+  "दवा", "dawa", "medicine", "tablet", "syrup", "paracetamol", "पैरासिटामोल", "बुखार", "fever",
+  "खांसी", "cough", "दर्द", "pain", "बच्चा", "baby", "infant", "बच्चे", "child", "खुराक",
+  "dosage", "dose", "टीका", "vaccine", "डॉक्टर", "doctor", "मरीज", "patient", "बीमारी",
+  "disease", "इलाज", "treatment", "गर्भवती", "pregnant", "स्वास्थ्य", "health", "ओआरएस", "ors",
+  "mg", "मिलीग्राम",
+  // Legal, Land & Civic Identity
+  "आधार", "aadhaar", "aadhar", "pan card", "voter", "खतौनी", "khatauni", "भूलेख", "land",
+  "जमीन", "registry", "प्रमाण पत्र", "certificate", "जाति", "caste", "आय", "income", "निवास",
+  "domicile", "कानून", "law", "अधिकार", "right", "हेल्पलाइन", "helpline", "complaint", "शिकायत",
+  "रुपये", "rupees", "लाख", "lakh", "हजार", "thousand", "कवरेज", "coverage", "लाभ", "benefit",
 ];
 
 export function validateQuery(rawQuery: string, startTime: number = Date.now()): ValidationOutcome {
@@ -186,7 +263,56 @@ export function validateQuery(rawQuery: string, startTime: number = Date.now()):
     };
   }
 
-  // Passed validation and represents an actionable query
+  // 5. Strict Domain Specificity Check
+  // Check if query contains recognized in-domain keywords
+  const hasInDomainSignal = IN_DOMAIN_KEYWORDS.some((kw) => lower.includes(kw));
+
+  // Check if query explicitly matches an out-of-domain topic (Sports, Bollywood, Jokes, Recipes, Coding)
+  for (const rule of OUT_OF_DOMAIN_RULES) {
+    const matchedKeyword = rule.keywords.find((kw) => {
+      // Match whole word or exact token boundary
+      const regex = new RegExp(`(^|\\s)${kw}(\\s|$)`, "i");
+      return regex.test(lower) || lower.includes(` ${kw} `) || lower.startsWith(`${kw} `) || lower.endsWith(` ${kw}`) || lower === kw;
+    });
+
+    if (matchedKeyword) {
+      return {
+        isValid: false,
+        type: "out_of_domain",
+        feedbackReport: createFeedbackReport(
+          query,
+          "सत्य-वाणी डोमेन रक्षक (Domain Guardrail)",
+          `सत्य-वाणी (VaniTrust) केवल भारत सरकार की कल्याणकारी योजनाओं (जैसे आयुष्मान भारत, पीएम किसान, राशन कार्ड), नागरिक अधिकारों और स्वास्थ्य संबंधी प्रमाणिक दिशानिर्देशों के सत्यापन के लिए आरक्षित है।\n\nयह प्रश्न हमारे कार्यक्षेत्र (${rule.category}) से बाहर है। खेल, मनोरंजन, सिनेमा अथवा सामान्य ज्ञान की जानकारी के लिए कृपया सामान्य खोज का उपयोग करें। यदि आपके पास किसी सरकारी योजना, सब्सिडी, पेंशन या दवा संबंधी सवाल है, तो कृपया पूछें।`,
+          "डोमेन सीमा प्रतिबंध (Domain Restricted: Out of Scope)",
+          `यह प्रश्न '${rule.category}' से संबंधित है। सत्य-वाणी केवल सरकारी योजनाओं और स्वास्थ्य नियमों की सत्यता जांचता है।`,
+          startTime
+        ),
+      };
+    }
+  }
+
+  // 6. Generic Out-of-Domain Catch: If query lacks ANY welfare, health, or civic anchor
+  // and starts with "who is" or "kaun hai" or asks about random foreign/trivia topics
+  const isGeneralTrivia =
+    /^(who is|who was|who are|tell me about|what is the capital of|kaun hai|koun hai)\s+/i.test(lower) ||
+    /(\bधोनी\b|\bकोहली\b|\bशाहरुख\b|\bसलमान\b)/.test(lower);
+
+  if (isGeneralTrivia && !hasInDomainSignal) {
+    return {
+      isValid: false,
+      type: "out_of_domain",
+      feedbackReport: createFeedbackReport(
+        query,
+        "सत्य-वाणी डोमेन रक्षक (Domain Guardrail)",
+        "सत्य-वाणी (VaniTrust) केवल भारत सरकार की कल्याणकारी योजनाओं (जैसे आयुष्मान भारत, पीएम किसान, राशन कार्ड), नागरिक अधिकारों और स्वास्थ्य व दवा संबंधी प्रमाणिक दिशानिर्देशों के लिए आरक्षित है।\n\nयह प्रश्न हमारे कार्यक्षेत्र (सामान्य ज्ञान / व्यक्ति विशेष) से बाहर है। कृपया किसी सरकारी योजना, सब्सिडी, पेंशन अथवा स्वास्थ्य संबंधी विषय पर सवाल पूछें।",
+        "डोमेन सीमा प्रतिबंध (Domain Restricted: Out of Scope)",
+        "यह प्रश्न सामान्य ज्ञान अथवा व्यक्ति विशेष से संबंधित है और सरकारी योजनाओं या स्वास्थ्य के कार्यक्षेत्र में नहीं आता।",
+        startTime
+      ),
+    };
+  }
+
+  // Query is valid and represents an actionable civic / welfare / health domain query
   return {
     isValid: true,
     type: "actionable",
